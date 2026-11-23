@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Callplan (simple): import callplan per Hub & cycle, approve, publish. Frontend-only demo for Unggul Plastik.",
+  "description": "Callplan: import callplan per Hub & cycle, approve, publish. Frontend-only demo for Unggul Plastik.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

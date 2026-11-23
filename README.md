@@ -1,11 +1,11 @@
-# Simple Callplan (Unggul Plastik) — demo
+# Callplan (Unggul Plastik) — demo
 
-Versi paling sederhana dari callplan untuk demo ke Unggul Plastik. Frontend-only (React + Vite), data dummy disimpan di browser (localStorage). Demo lama (`sales-ops-web`) tetap dipakai terpisah.
+Callplan untuk demo ke Unggul Plastik. Frontend-only (React + Vite), data dummy disimpan di browser (localStorage). Demo lama (`sales-ops-web`) tetap dipakai terpisah.
 
 ## Menu
 - **Dashboard** — jumlah callplan per status, siklus berjalan / berikutnya per Hub, aktivitas terakhir
 - **Master** — Product, Outlet, Salesman (referensi untuk validasi import)
-- **Sales** — Pipeline (kanban sederhana), Callplan
+- **Sales** — Pipeline (kanban), Callplan
 
 ## Callplan
 1. **Import** — form: Hub, start cycle date, end cycle date + file Excel kolom `Toko | Salesman | Hari | Siklus` (format persis contoh klien; baris info `start date cycle : … | Hub : …` di atas header otomatis mengisi form). Tombol *Template* dan *Pakai contoh file* tersedia.

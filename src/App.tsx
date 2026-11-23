@@ -50,7 +50,7 @@ function Shell() {
         <div className="flex items-center gap-2.5 px-4 py-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary"><ClipboardCheck className="h-5 w-5 text-primary-foreground" /></div>
           <div className="leading-tight">
-            <p className="text-sm font-bold text-foreground">Simple Callplan</p>
+            <p className="text-sm font-bold text-foreground">Callplan</p>
             <p className="text-xs text-muted-foreground">Unggul Plastik · demo</p>
           </div>
         </div>
