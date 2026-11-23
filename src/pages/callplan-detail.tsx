@@ -15,7 +15,8 @@ import { useApp } from "@/store/app-store";
 import { HARI, SIKLUS } from "@/data/seed";
 import type { Callplan, CallplanLine } from "@/data/types";
 import { cycleDays, findOverlaps, overlapMessage, visitDates } from "@/lib/callplan";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, todayIso } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { navigate } from "@/lib/nav";
 
 export function CallplanDetailPage({ id }: { id: string }) {
@@ -61,6 +62,8 @@ export function CallplanDetailPage({ id }: { id: string }) {
         <Info label="Created by" value={cp.createdBy} hint={fmtDate(cp.createdAt)} />
         <Info label="Updated by" value={cp.updatedBy} hint={fmtDate(cp.updatedAt)} />
       </div>
+
+      <CycleStrip cp={cp} outletName={outletName} salesName={salesName} />
 
       <Tabs defaultValue="lines">
         <TabsList><TabsTrigger value="lines">Detail Callplan</TabsTrigger><TabsTrigger value="audit">Audit Trail ({cp.audit.length})</TabsTrigger></TabsList>
@@ -113,6 +116,52 @@ export function CallplanDetailPage({ id }: { id: string }) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+const DAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+/** One card per date from start to end cycle; empty dates are shown too. */
+function CycleStrip({ cp, outletName, salesName }: { cp: Callplan; outletName: (id: string) => string; salesName: (id: string) => string }) {
+  const today = todayIso();
+  const days: string[] = [];
+  for (let d = new Date(cp.startDate + "T00:00:00"); d <= new Date(cp.endDate + "T00:00:00"); d.setDate(d.getDate() + 1))
+    days.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+  const byDate = new Map<string, CallplanLine[]>(days.map((d) => [d, []]));
+  cp.lines.forEach((l) => visitDates(cp.startDate, cp.endDate, l.hari, l.siklus).forEach((d) => byDate.get(d)?.push(l)));
+
+  return (
+    <Card>
+      <CardHeader className="pb-3"><CardTitle className="text-base">Jadwal per tanggal · {fmtDate(cp.startDate)} – {fmtDate(cp.endDate)}</CardTitle></CardHeader>
+      <CardContent>
+        <div className="mile-scroll flex gap-3 overflow-x-auto pb-2">
+          {days.map((d) => {
+            const list = byDate.get(d)!;
+            const isToday = d === today;
+            return (
+              <div key={d} className={cn("flex w-56 shrink-0 flex-col rounded-md border bg-background", isToday ? "border-primary ring-1 ring-primary/30" : "border-border")}>
+                <div className="flex items-center justify-between rounded-t-md bg-muted px-3 py-2">
+                  <div className="leading-tight">
+                    <p className="text-sm font-semibold">{DAY_NAMES[new Date(d + "T00:00:00").getDay()]}</p>
+                    <p className="text-xs text-muted-foreground">{fmtDate(d)}{isToday ? " · Hari ini" : ""}</p>
+                  </div>
+                  <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", list.length ? "bg-accent text-accent-foreground" : "bg-[#E8E8E8] text-[#4F4F4F]")}>{list.length} toko</span>
+                </div>
+                <div className="flex-1 space-y-1.5 p-2">
+                  {list.map((l) => (
+                    <div key={l.id} className="rounded-md border border-border px-2.5 py-1.5">
+                      <p className="truncate text-sm font-medium" title={outletName(l.outletId)}>{outletName(l.outletId)}</p>
+                      <p className="text-xs text-muted-foreground">{salesName(l.salesmanId)} · {l.siklus}</p>
+                    </div>
+                  ))}
+                  {!list.length && <p className="py-6 text-center text-xs text-muted-foreground">Tidak ada kunjungan</p>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
