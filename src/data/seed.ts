@@ -100,12 +100,23 @@ export const OUTLETS: Outlet[] = [
 
 export const OPPS: Opportunity[] = [
   { id: "OP-001", name: "Order perdana kursi", outletName: "Toko Sumber Rejeki", salesmanId: "S1", value: 8500000, stage: "Prospek", nextFollowUp: "2026-11-25" },
-  { id: "OP-002", name: "Restock container box", outletName: "Toko Maju Jaya", salesmanId: "S2", value: 12000000, stage: "Dijadwalkan", nextFollowUp: "2026-11-24" },
-  { id: "OP-003", name: "Produk baru rak susun", outletName: "Toko Plastik Abadi", salesmanId: "S3", value: 6300000, stage: "Negosiasi", nextFollowUp: "2026-11-26" },
+  { id: "OP-002", name: "Restock container box", outletName: "Toko Maju Jaya", salesmanId: "S2", value: 12000000, stage: "Dijadwalkan", nextFollowUp: "2026-11-20" },
+  { id: "OP-003", name: "Produk baru rak susun", outletName: "Toko Plastik Abadi", salesmanId: "S3", value: 6300000, stage: "Negosiasi", nextFollowUp: "2026-11-19" },
   { id: "OP-004", name: "Proyek meja lipat sekolah", outletName: "Toko Berkah", salesmanId: "S4", value: 35000000, stage: "Negosiasi", nextFollowUp: "2026-11-27" },
   { id: "OP-005", name: "Gelas plastik katering", outletName: "Toko Laris", salesmanId: "S5", value: 4600000, stage: "Menang", nextFollowUp: "2026-11-20" },
   { id: "OP-006", name: "Ember grosir", outletName: "Toko Sentosa", salesmanId: "S4", value: 3100000, stage: "Batal", nextFollowUp: "2026-11-18" },
+  { id: "OP-007", name: "Toko baru – paket starter", outletName: "Toko Cahaya Indah", salesmanId: "S6", value: 5200000, stage: "Prospek", nextFollowUp: "2026-11-21" },
+  { id: "OP-008", name: "Tempat sampah perkantoran", outletName: "Toko Prima Jaya", salesmanId: "S1", value: 18700000, stage: "Negosiasi", nextFollowUp: "2026-11-24" },
+  { id: "OP-009", name: "Container box gudang", outletName: "Toko Mitra Agung", salesmanId: "S7", value: 22400000, stage: "Dijadwalkan", nextFollowUp: "2026-11-17" },
+  { id: "OP-010", name: "Kursi acara hajatan", outletName: "Toko Karya Sentosa", salesmanId: "S8", value: 9800000, stage: "Prospek", nextFollowUp: "2026-11-26" },
+  { id: "OP-011", name: "Baskom & ember pasar", outletName: "Toko Rejeki Plastik", salesmanId: "S2", value: 7400000, stage: "Menang", nextFollowUp: "2026-11-16" },
+  { id: "OP-012", name: "Rak susun minimarket", outletName: "Toko Bintang Utama", salesmanId: "S5", value: 15600000, stage: "Negosiasi", nextFollowUp: "2026-11-22" },
+  { id: "OP-013", name: "Meja lipat kantin", outletName: "Toko Harapan Baru", salesmanId: "S3", value: 11200000, stage: "Menang", nextFollowUp: "2026-11-14" },
+  { id: "OP-014", name: "Gelas plastik kafe", outletName: "Toko Sinar Jaya", salesmanId: "S6", value: 3900000, stage: "Dijadwalkan", nextFollowUp: "2026-11-25" },
 ];
+
+/** Monthly sales target per salesman (Nov 2026). */
+export const TARGETS: Record<string, number> = { S1: 180000000, S2: 160000000, S3: 150000000, S4: 170000000, S5: 140000000, S6: 150000000, S7: 130000000, S8: 140000000 };
 
 function line(n: number, outletId: string, salesmanId: string, hari: Hari, siklus: Siklus) { return { id: `L${n}`, outletId, salesmanId, hari, siklus }; }
 const seq = { n: 100 };
@@ -137,4 +148,14 @@ export const CALLPLANS: Callplan[] = [
     createdBy: "Rina Admin", createdAt: "2026-11-21 11:00", updatedBy: "Rina Admin", updatedAt: "2026-11-21 11:00",
     audit: [{ at: "2026-11-21 11:00", by: "Rina Admin", action: "Import", note: "Import dari callplan_bdg.xlsx" }],
   },
+  ...(["Bandung", "Surabaya", "Semarang"] as const).map((hub, i): Callplan => ({
+    id: `CP-202611-00${4 + i}`, hub, startDate: "2026-11-09", endDate: "2026-11-20", status: "Published", fileName: `callplan_${hub.toLowerCase()}_9-20nov.xlsx`,
+    lines: SALESMEN.filter((s) => s.hub === hub).flatMap((s) => denseLines(s.id, seq)),
+    createdBy: "Rina Admin", createdAt: "2026-11-06 09:30", updatedBy: "Dewi Supervisor", updatedAt: "2026-11-07 10:20",
+    audit: [
+      { at: "2026-11-06 09:30", by: "Rina Admin", action: "Import", note: `Import dari callplan_${hub.toLowerCase()}_9-20nov.xlsx` },
+      { at: "2026-11-07 09:50", by: "Dewi Supervisor", action: "Approve" },
+      { at: "2026-11-07 10:20", by: "Dewi Supervisor", action: "Publish", note: "Dikirim ke Mile Field sebagai jadwal kunjungan" },
+    ],
+  })),
 ];

@@ -8,7 +8,7 @@ export interface Toast { id: number; tone?: "success" | "info" | "warning" | "da
 type Result = { ok: true; id?: string } | { ok: false; error: string };
 
 interface Data { callplans: Callplan[]; opps: Opportunity[]; outlets: Outlet[]; salesmen: Salesman[]; products: Product[]; userId: string }
-const KEY = "callplan-demo-v2";
+const KEY = "callplan-demo-v3";
 const fresh = (): Data => ({ callplans: CALLPLANS, opps: OPPS, outlets: OUTLETS, salesmen: SALESMEN, products: PRODUCTS, userId: "U1" });
 function load(): Data {
   try {
