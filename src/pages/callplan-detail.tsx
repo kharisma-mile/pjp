@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -224,11 +223,12 @@ function EditDialog({ cp, onClose }: { cp: Callplan; onClose: () => void }) {
     onClose();
   };
 
+  // native <select>: dozens of rows x 4 Radix Selects made the dialog freeze
   const sel = (value: string, onChange: (v: string) => void, items: { v: string; l: string }[]) => (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-      <SelectContent>{items.map((i) => <SelectItem key={i.v} value={i.v}>{i.l}</SelectItem>)}</SelectContent>
-    </Select>
+    <select value={value} onChange={(e) => onChange(e.target.value)}
+      className="h-8 w-full rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+      {items.map((i) => <option key={i.v} value={i.v}>{i.l}</option>)}
+    </select>
   );
 
   return (
