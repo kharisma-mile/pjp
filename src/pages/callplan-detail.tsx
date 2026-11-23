@@ -147,7 +147,12 @@ function CycleStrip({ cp, outletName, salesName }: { cp: Callplan; outletName: (
                   </div>
                   <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", list.length ? "bg-accent text-accent-foreground" : "bg-[#E8E8E8] text-[#4F4F4F]")}>{list.length} toko</span>
                 </div>
-                <div className="flex-1 space-y-1.5 p-2">
+                {list.length > 0 && (
+                  <p className="truncate border-b border-border px-3 py-1.5 text-[11px] text-muted-foreground">
+                    {[...new Set(list.map((l) => l.salesmanId))].map((sid) => `${salesName(sid)} ${list.filter((l) => l.salesmanId === sid).length}`).join(" · ")}
+                  </p>
+                )}
+                <div className="mile-scroll max-h-[360px] flex-1 space-y-1.5 overflow-y-auto p-2">
                   {list.map((l) => (
                     <div key={l.id} className="rounded-md border border-border px-2.5 py-1.5">
                       <p className="truncate text-sm font-medium" title={outletName(l.outletId)}>{outletName(l.outletId)}</p>

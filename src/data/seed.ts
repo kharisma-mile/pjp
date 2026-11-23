@@ -28,9 +28,60 @@ export const SALESMEN: Salesman[] = [
   { id: "S3", name: "Andre", hub: "Bandung", phone: "0812-1100-2203" },
   { id: "S4", name: "Sari", hub: "Surabaya", phone: "0812-1100-2204" },
   { id: "S5", name: "Yoga", hub: "Semarang", phone: "0812-1100-2205" },
+  { id: "S6", name: "Citra", hub: "Jakarta", phone: "0812-1100-2206" },
+  { id: "S7", name: "Dimas", hub: "Bandung", phone: "0812-1100-2207" },
+  { id: "S8", name: "Rudi", hub: "Surabaya", phone: "0812-1100-2208" },
 ];
 
 const o = (id: string, name: string, hub: string, address: string, owner: string): Outlet => ({ id, name, hub, address, owner });
+/* ---------- generated dummy data (dense daily schedule) ---------- */
+
+const NAME_A = ["Sumber", "Maju", "Jaya", "Berkah", "Sinar", "Mitra", "Cahaya", "Karya", "Sejahtera", "Makmur", "Abadi", "Lestari", "Mulia", "Harapan", "Rejeki", "Bintang", "Prima", "Sentral"];
+const NAME_B = ["Plastik", "Makmur", "Abadi", "Jaya", "Sentosa", "Utama", "Baru", "Mandiri", "Agung", "Sakti", "Indah", "Murni", "Sumber", "Raya", "Kencana", "Gemilang", "Perkasa", "Sukses"];
+const STREETS: Record<string, string[]> = {
+  Jakarta: ["Jl. Pasar Minggu", "Jl. Pramuka", "Jl. Daan Mogot", "Jl. Gunung Sahari", "Jl. Fatmawati", "Jl. Pemuda"],
+  Bandung: ["Jl. Soekarno-Hatta", "Jl. Pasirkaliki", "Jl. Buah Batu", "Jl. Cikutra"],
+  Surabaya: ["Jl. Rungkut", "Jl. Darmo", "Jl. Kenjeran", "Jl. Ngagel"],
+  Semarang: ["Jl. Pandanaran", "Jl. Majapahit", "Jl. Setiabudi", "Jl. Kaligawe"],
+};
+const OWNERS = ["Pak Agus", "Bu Sri", "Pak Dedi", "Bu Yanti", "Pak Rahmat", "Bu Wati", "Pak Eko", "Bu Rina", "Pak Tono", "Bu Ani"];
+/** Outlets per salesman: 30 → about 4–6 visits per working day. */
+export const OUTLETS_PER_SALESMAN = 30;
+
+function generatedOutlets(): Outlet[] {
+  const out: Outlet[] = [];
+  let n = 100;
+  const used = new Set<string>();
+  SALESMEN.forEach((sm, si) => {
+    for (let i = 0; i < OUTLETS_PER_SALESMAN; i++) {
+      let k = si * 37 + i * 7;
+      let name = "";
+      for (let tries = 0; tries < 1000; tries++, k++) {
+        name = `Toko ${NAME_A[k % NAME_A.length]} ${NAME_B[Math.floor(k / NAME_A.length) % NAME_B.length]}`;
+        if (NAME_A[k % NAME_A.length] === NAME_B[Math.floor(k / NAME_A.length) % NAME_B.length]) continue;
+        if (!used.has(name)) break;
+      }
+      if (used.has(name)) name = `${name} ${i + 1}`;
+      used.add(name);
+      const st = STREETS[sm.hub];
+      out.push(o(`O${n++}`, name, sm.hub, `${st[i % st.length]} ${10 + ((i * 13) % 180)}, ${sm.hub}`, OWNERS[(si + i) % OWNERS.length]));
+    }
+  });
+  return out;
+}
+
+/** Spreads a salesman's generated outlets over Senin–Sabtu; one in three rounds is biweekly, every 5th gets a 2nd visit day. */
+function denseLines(salesmanId: string, seq: { n: number }): ReturnType<typeof line>[] {
+  const si = SALESMEN.findIndex((s) => s.id === salesmanId);
+  const mine = generatedOutlets().filter((x) => Number(x.id.slice(1)) >= 100 + si * OUTLETS_PER_SALESMAN && Number(x.id.slice(1)) < 100 + (si + 1) * OUTLETS_PER_SALESMAN);
+  const out: ReturnType<typeof line>[] = [];
+  mine.forEach((x, i) => {
+    out.push(line(seq.n++, x.id, salesmanId, HARI[i % 6], Math.floor(i / 6) % 3 === 2 ? "biweekly" : "weekly"));
+    if (i % 5 === 0) out.push(line(seq.n++, x.id, salesmanId, HARI[(i + 3) % 6], "weekly"));
+  });
+  return out;
+}
+
 export const OUTLETS: Outlet[] = [
   o("O1", "Toko Haris", "Jakarta", "Jl. Pasar Baru 12, Jakarta Pusat", "Pak Haris"),
   o("O2", "Toko Sandhy", "Jakarta", "Jl. Tebet Raya 45, Jakarta Selatan", "Pak Sandhy"),
@@ -43,7 +94,9 @@ export const OUTLETS: Outlet[] = [
   o("O9", "Toko Berkah", "Surabaya", "Jl. Pasar Atom 9, Surabaya", "Pak Slamet"),
   o("O10", "Toko Sentosa", "Surabaya", "Jl. Kapasan 21, Surabaya", "Bu Ning"),
   o("O11", "Toko Laris", "Semarang", "Jl. Johar 5, Semarang", "Pak Joko"),
+  ...generatedOutlets(),
 ];
+
 
 export const OPPS: Opportunity[] = [
   { id: "OP-001", name: "Order perdana kursi", outletName: "Toko Sumber Rejeki", salesmanId: "S1", value: 8500000, stage: "Prospek", nextFollowUp: "2026-11-25" },
@@ -54,15 +107,16 @@ export const OPPS: Opportunity[] = [
   { id: "OP-006", name: "Ember grosir", outletName: "Toko Sentosa", salesmanId: "S4", value: 3100000, stage: "Batal", nextFollowUp: "2026-11-18" },
 ];
 
-const line = (n: number, outletId: string, salesmanId: string, hari: Hari, siklus: Siklus) => ({ id: `L${n}`, outletId, salesmanId, hari, siklus });
+function line(n: number, outletId: string, salesmanId: string, hari: Hari, siklus: Siklus) { return { id: `L${n}`, outletId, salesmanId, hari, siklus }; }
+const seq = { n: 100 };
 
 export const CALLPLANS: Callplan[] = [
   {
     id: "CP-202611-001", hub: "Jakarta", startDate: "2026-11-09", endDate: "2026-11-20", status: "Published", fileName: "callplan_jakarta_9-20nov.xlsx",
-    lines: [line(1, "O1", "S1", "Senin", "weekly"), line(2, "O2", "S1", "Selasa", "biweekly"), line(3, "O5", "S2", "Rabu", "weekly"), line(4, "O6", "S2", "Kamis", "weekly")],
+    lines: [line(1, "O1", "S1", "Senin", "weekly"), line(2, "O2", "S1", "Selasa", "biweekly"), line(3, "O5", "S2", "Rabu", "weekly"), line(4, "O6", "S2", "Kamis", "weekly"), ...denseLines("S1", seq), ...denseLines("S2", seq), ...denseLines("S6", seq)],
     createdBy: "Rina Admin", createdAt: "2026-11-06 09:12", updatedBy: "Dewi Supervisor", updatedAt: "2026-11-07 10:05",
     audit: [
-      { at: "2026-11-06 09:12", by: "Rina Admin", action: "Import", note: "4 baris dari callplan_jakarta_9-20nov.xlsx" },
+      { at: "2026-11-06 09:12", by: "Rina Admin", action: "Import", note: "Import dari callplan_jakarta_9-20nov.xlsx" },
       { at: "2026-11-06 14:30", by: "Rina Admin", action: "Edit", note: "Toko Sandhy: siklus weekly → biweekly" },
       { at: "2026-11-07 09:40", by: "Dewi Supervisor", action: "Approve" },
       { at: "2026-11-07 10:05", by: "Dewi Supervisor", action: "Publish", note: "Dikirim ke Mile Field sebagai jadwal kunjungan" },
@@ -70,17 +124,17 @@ export const CALLPLANS: Callplan[] = [
   },
   {
     id: "CP-202611-002", hub: "Surabaya", startDate: "2026-11-23", endDate: "2026-12-04", status: "Approved", fileName: "callplan_sby_23nov-4des.xlsx",
-    lines: [line(5, "O9", "S4", "Senin", "weekly"), line(6, "O10", "S4", "Rabu", "biweekly")],
+    lines: [line(5, "O9", "S4", "Senin", "weekly"), line(6, "O10", "S4", "Rabu", "biweekly"), ...denseLines("S4", seq), ...denseLines("S8", seq)],
     createdBy: "Rina Admin", createdAt: "2026-11-19 08:30", updatedBy: "Dewi Supervisor", updatedAt: "2026-11-20 16:10",
     audit: [
-      { at: "2026-11-19 08:30", by: "Rina Admin", action: "Import", note: "2 baris dari callplan_sby_23nov-4des.xlsx" },
+      { at: "2026-11-19 08:30", by: "Rina Admin", action: "Import", note: "Import dari callplan_sby_23nov-4des.xlsx" },
       { at: "2026-11-20 16:10", by: "Dewi Supervisor", action: "Approve" },
     ],
   },
   {
     id: "CP-202611-003", hub: "Bandung", startDate: "2026-11-30", endDate: "2026-12-11", status: "Draft", fileName: "callplan_bdg.xlsx",
-    lines: [line(7, "O7", "S3", "Selasa", "weekly"), line(8, "O8", "S3", "Kamis", "biweekly")],
+    lines: [line(7, "O7", "S3", "Selasa", "weekly"), line(8, "O8", "S3", "Kamis", "biweekly"), ...denseLines("S3", seq), ...denseLines("S7", seq)],
     createdBy: "Rina Admin", createdAt: "2026-11-21 11:00", updatedBy: "Rina Admin", updatedAt: "2026-11-21 11:00",
-    audit: [{ at: "2026-11-21 11:00", by: "Rina Admin", action: "Import", note: "2 baris dari callplan_bdg.xlsx" }],
+    audit: [{ at: "2026-11-21 11:00", by: "Rina Admin", action: "Import", note: "Import dari callplan_bdg.xlsx" }],
   },
 ];
